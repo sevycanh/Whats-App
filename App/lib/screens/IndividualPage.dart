@@ -1,18 +1,20 @@
-
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:whats_app/CustomUI/OwnMessageCard.dart';
 import 'package:whats_app/CustomUI/ReplyCard.dart';
 import 'package:whats_app/Model/ChatModel.dart';
+import 'package:flutter/foundation.dart' as foundation;
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
+import '../Model/MessageModel.dart';
+
 class IndividualPage extends StatefulWidget {
-  
   final ChatModel chatModel;
   final ChatModel sourchat;
 
-  const IndividualPage({super.key, required this.chatModel, required this.sourchat});
+  const IndividualPage(
+      {super.key, required this.chatModel, required this.sourchat});
 
   @override
   State<IndividualPage> createState() => _IndividualPageState();
@@ -23,8 +25,8 @@ class _IndividualPageState extends State<IndividualPage> {
   FocusNode focusNode = FocusNode();
   bool sendButton = false;
   List<MessageModel> messages = [];
-  TextEditingController _controller = TextEditingController();
-  ScrollController _scrollController = ScrollController();
+  final TextEditingController _controller = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
   late IO.Socket socket;
   @override
   void initState() {
@@ -194,7 +196,6 @@ class _IndividualPageState extends State<IndividualPage> {
               child: Column(
                 children: [
                   Expanded(
-                    // height: MediaQuery.of(context).size.height - 150,
                     child: ListView.builder(
                       shrinkWrap: true,
                       controller: _scrollController,
@@ -257,7 +258,8 @@ class _IndividualPageState extends State<IndividualPage> {
                                     decoration: InputDecoration(
                                       border: InputBorder.none,
                                       hintText: "Type a message",
-                                      hintStyle: const TextStyle(color: Colors.grey),
+                                      hintStyle:
+                                          const TextStyle(color: Colors.grey),
                                       prefixIcon: IconButton(
                                         icon: Icon(
                                           show
@@ -324,8 +326,8 @@ class _IndividualPageState extends State<IndividualPage> {
                                         _scrollController.animateTo(
                                             _scrollController
                                                 .position.maxScrollExtent,
-                                            duration:
-                                                const Duration(milliseconds: 300),
+                                            duration: const Duration(
+                                                milliseconds: 300),
                                             curve: Curves.easeOut);
                                         sendMessage(
                                             _controller.text,
@@ -341,23 +343,23 @@ class _IndividualPageState extends State<IndividualPage> {
                                 ),
                               ),
                             ],
-                          ),
-                          show ? emojiSelect() : Container(),
+                          ),                        
                         ],
                       ),
                     ),
                   ),
+                  show ? emojiSelect() : Container(),
                 ],
               ),
               onPopInvoked: (didPop) {
-                if (didPop){
+                if (didPop) {
                   if (show) {
-                  setState(() {
-                    show = false;
-                  });
-                } else {
-                  Navigator.pop(context);
-                }
+                    setState(() {
+                      show = false;
+                    });
+                  } else {
+                    // Navigator.pop(context);
+                  }
                 }
               },
             ),
@@ -454,10 +456,24 @@ class _IndividualPageState extends State<IndividualPage> {
           _controller.text += emoji.emoji;
         });
       },
-      onBackspacePressed: () {
-        
-      },
+      onBackspacePressed: () {},
       textEditingController: _controller,
+      config: Config(
+        height: 256,
+        checkPlatformCompatibility: true,
+        emojiViewConfig: EmojiViewConfig(
+          // Issue: https://github.com/flutter/flutter/issues/28894
+          emojiSizeMax: 28 *
+              (foundation.defaultTargetPlatform == TargetPlatform.iOS
+                  ? 1.2
+                  : 1.0),
+        ),
+        swapCategoryAndBottomBar: false,
+        skinToneConfig: const SkinToneConfig(),
+        categoryViewConfig: const CategoryViewConfig(),
+        bottomActionBarConfig: const BottomActionBarConfig(),
+        searchViewConfig: const SearchViewConfig(),
+      ),
     );
   }
 }
