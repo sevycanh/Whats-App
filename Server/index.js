@@ -25,6 +25,10 @@ io.on("connection", (socket) => {
     });
 });
 
+app.route("/check").get((req, res)=>{
+    return res.json("Your App is working fine");
+});
+
 server.listen(port, ()=>{
     console.log("server started");
 })
