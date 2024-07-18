@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:whats_app/Model/ChatModel.dart';
 import 'package:whats_app/pages/CameraPage.dart';
 import 'package:whats_app/pages/ChatPage.dart';
+import 'package:whats_app/pages/StatusPage.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key, required this.chatModels, required this.sourChat});
@@ -85,7 +86,7 @@ class _HomeScreenState extends State<HomeScreen>
             chatmodels: widget.chatModels,
             sourchat: widget.sourChat,
           ),
-          const Text("STATUS"),
+          const StatusPage(),
           const Text("Calls"),
         ],
       ),
