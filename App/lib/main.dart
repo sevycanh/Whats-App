@@ -1,7 +1,8 @@
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
-import 'package:whats_app/NewScreen/LandingScreen.dart';
+import 'package:whats_app/NewScreens/LandingScreen.dart';
 import 'package:whats_app/screens/CameraScreen.dart';
+import 'package:whats_app/screens/LoginScreen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -35,7 +36,7 @@ class MyApp extends StatelessWidget {
         fontFamily: "OpenSans",
         useMaterial3: true,
       ),
-      home: const LandingScreen(),
+      home: const LoginScreen(),
     );
   }
 }
