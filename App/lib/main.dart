@@ -1,6 +1,5 @@
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
-import 'package:whats_app/NewScreens/LandingScreen.dart';
 import 'package:whats_app/screens/CameraScreen.dart';
 import 'package:whats_app/screens/LoginScreen.dart';
 

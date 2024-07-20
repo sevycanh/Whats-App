@@ -1,11 +1,14 @@
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:whats_app/CustomUI/OwnMessageCard.dart';
 import 'package:whats_app/CustomUI/ReplyCard.dart';
 import 'package:whats_app/Model/ChatModel.dart';
 import 'package:flutter/foundation.dart' as foundation;
 import 'package:socket_io_client/socket_io_client.dart' as IO;
+import 'package:whats_app/screens/CameraScreen.dart';
+import 'package:whats_app/screens/CameraView.dart';
 
 import '../Model/MessageModel.dart';
 
@@ -28,6 +31,9 @@ class _IndividualPageState extends State<IndividualPage> {
   final TextEditingController _controller = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   late IO.Socket socket;
+  final ImagePicker _picker = ImagePicker();
+  XFile? file;
+
   @override
   void initState() {
     super.initState();
@@ -55,7 +61,7 @@ class _IndividualPageState extends State<IndividualPage> {
       print("Connected");
       socket.on("message", (msg) {
         print(msg);
-        setMessage("destination", msg["message"]);
+        setMessage("destination", msg["message"], msg["path"]);
         _scrollController.animateTo(_scrollController.position.maxScrollExtent,
             duration: const Duration(milliseconds: 300), curve: Curves.easeOut);
       });
@@ -63,16 +69,17 @@ class _IndividualPageState extends State<IndividualPage> {
     print(socket.connected);
   }
 
-  void sendMessage(String message, int sourceId, int targetId) {
-    setMessage("source", message);
+  void sendMessage(String message, int sourceId, int targetId, String path) {
+    setMessage("source", message, path);
     socket.emit("message",
-        {"message": message, "sourceId": sourceId, "targetId": targetId});
+        {"message": message, "sourceId": sourceId, "targetId": targetId, "path": path});
   }
 
-  void setMessage(String type, String message) {
+  void setMessage(String type, String message, String path) {
     MessageModel messageModel = MessageModel(
         type: type,
         message: message,
+        path: path,
         time: DateTime.now().toString().substring(10, 16));
     print(messages);
 
@@ -219,6 +226,7 @@ class _IndividualPageState extends State<IndividualPage> {
                         }
                       },
                     ),
+                    
                   ),
                   Align(
                     alignment: Alignment.bottomCenter,
@@ -293,11 +301,11 @@ class _IndividualPageState extends State<IndividualPage> {
                                           IconButton(
                                             icon: const Icon(Icons.camera_alt),
                                             onPressed: () {
-                                              // Navigator.push(
-                                              //     context,
-                                              //     MaterialPageRoute(
-                                              //         builder: (builder) =>
-                                              //             CameraApp()));
+                                              Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                      builder: (builder) =>
+                                                          CameraScreen()));
                                             },
                                           ),
                                         ],
@@ -332,7 +340,8 @@ class _IndividualPageState extends State<IndividualPage> {
                                         sendMessage(
                                             _controller.text,
                                             widget.sourchat.id,
-                                            widget.chatModel.id);
+                                            widget.chatModel.id,
+                                            "");
                                         _controller.clear();
                                         setState(() {
                                           sendButton = false;
@@ -343,7 +352,7 @@ class _IndividualPageState extends State<IndividualPage> {
                                 ),
                               ),
                             ],
-                          ),                        
+                          ),
                         ],
                       ),
                     ),
@@ -383,16 +392,33 @@ class _IndividualPageState extends State<IndividualPage> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  iconCreation(
-                      Icons.insert_drive_file, Colors.indigo, "Document"),
+                  iconCreation(Icons.insert_drive_file, Colors.indigo,
+                      "Document", () {}),
                   const SizedBox(
                     width: 40,
                   ),
-                  iconCreation(Icons.camera_alt, Colors.pink, "Camera"),
+                  iconCreation(Icons.camera_alt, Colors.pink, "Camera", () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => CameraScreen(),
+                        ));
+                  }),
                   const SizedBox(
                     width: 40,
                   ),
-                  iconCreation(Icons.insert_photo, Colors.purple, "Gallery"),
+                  iconCreation(Icons.insert_photo, Colors.purple, "Gallery",
+                      () async {
+                    file = await _picker.pickImage(source: ImageSource.gallery);
+                    if (file!.path.isNotEmpty && mounted) {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                CameraViewPage(path: file!.path),
+                          ));
+                    }
+                  }),
                 ],
               ),
               const SizedBox(
@@ -401,15 +427,16 @@ class _IndividualPageState extends State<IndividualPage> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  iconCreation(Icons.headset, Colors.orange, "Audio"),
+                  iconCreation(Icons.headset, Colors.orange, "Audio", () {}),
                   const SizedBox(
                     width: 40,
                   ),
-                  iconCreation(Icons.location_pin, Colors.teal, "Location"),
+                  iconCreation(
+                      Icons.location_pin, Colors.teal, "Location", () {}),
                   const SizedBox(
                     width: 40,
                   ),
-                  iconCreation(Icons.person, Colors.blue, "Contact"),
+                  iconCreation(Icons.person, Colors.blue, "Contact", () {}),
                 ],
               ),
             ],
@@ -419,9 +446,10 @@ class _IndividualPageState extends State<IndividualPage> {
     );
   }
 
-  Widget iconCreation(IconData icons, Color color, String text) {
+  Widget iconCreation(
+      IconData icons, Color color, String text, void Function()? onTap) {
     return InkWell(
-      onTap: () {},
+      onTap: onTap,
       child: Column(
         children: [
           CircleAvatar(
