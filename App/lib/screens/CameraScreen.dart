@@ -10,7 +10,9 @@ import 'package:whats_app/screens/VideoView.dart';
 late List<CameraDescription> cameras;
 
 class CameraScreen extends StatefulWidget {
-  const CameraScreen({super.key});
+  const CameraScreen({super.key, required this.onImageSend});
+  final Function onImageSend;
+
   @override
   State<CameraScreen> createState() => _CameraScreenState();
 }
@@ -164,6 +166,7 @@ class _CameraScreenState extends State<CameraScreen> {
         MaterialPageRoute(
             builder: (builder) => CameraViewPage(
                   path: file.path,
+                  onImageSend: widget.onImageSend,
                 )));
   }
 }

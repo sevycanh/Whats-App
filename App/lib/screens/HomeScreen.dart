@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:whats_app/Model/ChatModel.dart';
-import 'package:whats_app/pages/CameraPage.dart';
 import 'package:whats_app/pages/ChatPage.dart';
 import 'package:whats_app/pages/StatusPage.dart';
+import 'package:whats_app/screens/CameraScreen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key, required this.chatModels, required this.sourChat});
@@ -26,7 +26,7 @@ class _HomeScreenState extends State<HomeScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Whatsapp Clone"),
+        title: const Text("WhatsApp"),
         actions: [
           IconButton(icon: const Icon(Icons.search), onPressed: () {}),
           PopupMenuButton<String>(
@@ -81,7 +81,7 @@ class _HomeScreenState extends State<HomeScreen>
       body: TabBarView(
         controller: _controller,
         children: [
-          const CameraPage(),
+          CameraScreen(onImageSend: (){},),
           ChatPage(
             chatmodels: widget.chatModels,
             sourchat: widget.sourChat,

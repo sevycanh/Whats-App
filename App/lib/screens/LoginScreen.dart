@@ -15,7 +15,7 @@ class _LoginScreenState extends State<LoginScreen> {
   late ChatModel sourceChat;
   List<ChatModel> chatModels = [
     ChatModel(
-      name: "Dev Stack",
+      name: "Decade Xu Dua",
       isGroup: false,
       currentMessage: "Hi Everyone",
       time: "4:00",
@@ -23,7 +23,7 @@ class _LoginScreenState extends State<LoginScreen> {
       id: 1,
     ),
     ChatModel(
-      name: "Kishor",
+      name: "Sevycanh",
       isGroup: false,
       currentMessage: "Hi Kishor",
       time: "13:00",
@@ -32,7 +32,7 @@ class _LoginScreenState extends State<LoginScreen> {
     ),
 
     ChatModel(
-      name: "Collins",
+      name: "Canh Mai",
       isGroup: false,
       currentMessage: "Hi Dev Stack",
       time: "8:00",
@@ -41,7 +41,7 @@ class _LoginScreenState extends State<LoginScreen> {
     ),
 
     ChatModel(
-      name: "Balram Rathore",
+      name: "Ngoc Canh",
       isGroup: false,
       currentMessage: "Hi Dev Stack",
       time: "2:00",

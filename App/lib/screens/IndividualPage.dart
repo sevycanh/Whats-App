@@ -1,14 +1,19 @@
+import 'dart:convert';
+
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:whats_app/CustomUI/OwnFileCard.dart';
 import 'package:whats_app/CustomUI/OwnMessageCard.dart';
 import 'package:whats_app/CustomUI/ReplyCard.dart';
+import 'package:whats_app/CustomUI/ReplyFileCard.dart';
 import 'package:whats_app/Model/ChatModel.dart';
 import 'package:flutter/foundation.dart' as foundation;
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:whats_app/screens/CameraScreen.dart';
 import 'package:whats_app/screens/CameraView.dart';
+import 'package:http/http.dart' as http;
 
 import '../Model/MessageModel.dart';
 
@@ -33,6 +38,7 @@ class _IndividualPageState extends State<IndividualPage> {
   late IO.Socket socket;
   final ImagePicker _picker = ImagePicker();
   XFile? file;
+  int popTime = 0;
 
   @override
   void initState() {
@@ -71,8 +77,12 @@ class _IndividualPageState extends State<IndividualPage> {
 
   void sendMessage(String message, int sourceId, int targetId, String path) {
     setMessage("source", message, path);
-    socket.emit("message",
-        {"message": message, "sourceId": sourceId, "targetId": targetId, "path": path});
+    socket.emit("message", {
+      "message": message,
+      "sourceId": sourceId,
+      "targetId": targetId,
+      "path": path
+    });
   }
 
   void setMessage(String type, String message, String path) {
@@ -85,6 +95,33 @@ class _IndividualPageState extends State<IndividualPage> {
 
     setState(() {
       messages.add(messageModel);
+    });
+  }
+
+  void onImageSend(String path, String message) async {
+    for (int i = 0; i < popTime; i++) {
+      Navigator.pop(context);
+    }
+    setState(() {
+      popTime = 0;
+    });
+
+    var request = http.MultipartRequest(
+        "POST", Uri.parse("http://10.0.2.2:3000/routes/addimage"));
+    request.files.add(await http.MultipartFile.fromPath("img", path));
+    request.headers.addAll({'Content-Type': "multipart/form-data"});
+    http.StreamedResponse response = await request.send();
+    var httpResponse = await http.Response.fromStream(response);
+    var data = jsonDecode(httpResponse.body);
+    print(data['path']);
+
+    setMessage("source", message, path);
+
+    socket.emit("message", {
+      "message": message,
+      "sourceId": widget.sourchat.id,
+      "targetId": widget.chatModel.id,
+      "path": data['path']
     });
   }
 
@@ -214,19 +251,34 @@ class _IndividualPageState extends State<IndividualPage> {
                           );
                         }
                         if (messages[index].type == "source") {
-                          return OwnMessageCard(
-                            message: messages[index].message,
-                            time: messages[index].time,
-                          );
+                          if (messages[index].path != "") {
+                            return OwnFileCard(
+                              path: messages[index].path,
+                              message: messages[index].message,
+                              time: messages[index].time,
+                            );
+                          } else {
+                            return OwnMessageCard(
+                              message: messages[index].message,
+                              time: messages[index].time,
+                            );
+                          }
                         } else {
-                          return ReplyCard(
-                            message: messages[index].message,
-                            time: messages[index].time,
-                          );
+                          if (messages[index].path.isNotEmpty) {
+                            return ReplyFileCard(
+                              path: messages[index].path,
+                              message: messages[index].message,
+                              time: messages[index].time,
+                            );
+                          } else {
+                            return ReplyCard(
+                              message: messages[index].message,
+                              time: messages[index].time,
+                            );
+                          }
                         }
                       },
                     ),
-                    
                   ),
                   Align(
                     alignment: Alignment.bottomCenter,
@@ -301,11 +353,18 @@ class _IndividualPageState extends State<IndividualPage> {
                                           IconButton(
                                             icon: const Icon(Icons.camera_alt),
                                             onPressed: () {
+                                              setState(() {
+                                                popTime = 2;
+                                              });
+
                                               Navigator.push(
                                                   context,
                                                   MaterialPageRoute(
                                                       builder: (builder) =>
-                                                          CameraScreen()));
+                                                          CameraScreen(
+                                                            onImageSend:
+                                                                onImageSend,
+                                                          )));
                                             },
                                           ),
                                         ],
@@ -398,10 +457,16 @@ class _IndividualPageState extends State<IndividualPage> {
                     width: 40,
                   ),
                   iconCreation(Icons.camera_alt, Colors.pink, "Camera", () {
+                    setState(() {
+                      popTime = 3;
+                    });
+
                     Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => CameraScreen(),
+                          builder: (context) => CameraScreen(
+                            onImageSend: onImageSend,
+                          ),
                         ));
                   }),
                   const SizedBox(
@@ -409,13 +474,19 @@ class _IndividualPageState extends State<IndividualPage> {
                   ),
                   iconCreation(Icons.insert_photo, Colors.purple, "Gallery",
                       () async {
+                    setState(() {
+                      popTime = 2;
+                    });
+
                     file = await _picker.pickImage(source: ImageSource.gallery);
                     if (file!.path.isNotEmpty && mounted) {
                       Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) =>
-                                CameraViewPage(path: file!.path),
+                            builder: (context) => CameraViewPage(
+                              path: file!.path,
+                              onImageSend: onImageSend,
+                            ),
                           ));
                     }
                   }),
