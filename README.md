@@ -1,4 +1,4 @@
-# Chat App
+# WhatsApp Mini
 Technologies: Flutter, NodeJS, SocketIO
 ## Screenshots
 <img src="https://github.com/user-attachments/assets/f41daa9d-1abc-42f8-8815-3b68a8eabc66" width="200" height="450"/>
