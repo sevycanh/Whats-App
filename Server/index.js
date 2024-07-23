@@ -3,10 +3,17 @@ const http = require("http");
 const app = express();
 const port = process.env.PORT || 3000;
 var server = http.createServer(app);
+// const cors = require("cors);
+// var io = require("socket.io")(server, {
+//     cors: {
+//         origin:"*",
+//     },
+// });
 var io = require("socket.io")(server);
 
 //middleware
 app.use(express.json());
+// app.use(cors());
 var clients = {};
 const routes = require("./routes");
 app.use("/routes", routes);
